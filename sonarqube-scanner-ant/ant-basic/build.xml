@@ -1,26 +1,50 @@
-<project name="test" default="run">    
-	
-	<target name="clean">
-       <delete dir="build" /> <!-- clean -->
+<project name="ant-sample" basedir="." default="build">
+ 
+
+    <!-- properties -->
+    <property name="src.dir"     value="src"/>
+    <property name="build.dir"   value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="jar.dir"     value="${build.dir}/jar"/>
+    <property name="doc.dir"     value="doc"/>
+    <property name="sonar.projectKey" value="y7dewgealsdio" />
+    <property name="sonar.projectName" value="Example of SonarScanner for Ant Usage" />
+    <property name="sonar.projectVersion" value="1.0" />
+    <property name="sonar.exclusions" value="src/piona" />
+    <property name="sonar.java.binaries" value="build/jar/" />
+    <property name="sonar.java.libraries" value="lib/*.jar" />
+
+    <!-- targets -->
+    <target name="compile" description="compile project">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" includeantruntime="false"/>
     </target>
 
-    <target name="compile" depends="clean">
-        <echo> Java Compile task </echo>
-       <mkdir dir="build/classes" /> 
-         <javac srcdir="src" destdir="build/classes" /> <!-- java compile -->
+    <target name="jar" depends="compile" description="generate the distribution jar">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="piona.Main"/>
+            </manifest>
+        </jar>
     </target>
-   
-   <target name="package" depends="compile">
-       <echo> Java package task </echo>
-       <jar basedir="build/classes" destfile="build/jar/Helloworld.jar"> <!-- package -->
-          <manifest>
-             <attribute name="Main-Class" value="Hello2"/>
-          </manifest>
-       </jar>
-   </target>
-   <target name="run" depends="package"> 
-      <echo> running jar file task </echo>
-      <java jar="build/jar/Helloworld.jar" fork='true'/> <!-- run -->
-   </target>
+
+    <target name="run" depends="jar" description="run application">
+        <java jar="${jar.dir}/${ant.project.name}.jar" fork="true"/>
+    </target>
+
+    <target name="build" depends="jar" description="build application"/>
+
+    <target name="doc" description="generate documentation">
+        <mkdir dir="${doc.dir}" />
+        <javadoc destdir="${doc.dir}" sourcepath="${src.dir}"/>
+    </target>
+
+    <target name="clean" description="clean up build files">
+        <delete dir="${build.dir}"/>
+        <delete dir="${doc.dir}" />
+    </target>
+
+    <target name="rebuild" depends="clean,build" description="rebuild application"/>
 
 </project>
